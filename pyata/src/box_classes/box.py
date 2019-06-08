@@ -74,7 +74,7 @@ class Box:
             return True
                 
         else:
-            print False
+            print(False)
         
 
     #method that sets the canvas
@@ -192,11 +192,11 @@ class Box:
     @staticmethod
     def debug():
         box = Box(20, 20, 0)
-        print box.move(10, 10)
-        print box.select()
-        print box.unselect()
-        print box.shift_select()
-        print box.shift_unselect()
+        print(box.move(10, 10))
+        print(box.select())
+        print(box.unselect())
+        print(box.shift_select())
+        print(box.shift_unselect())
     
 
 

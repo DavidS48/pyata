@@ -15,10 +15,10 @@ from threading  import *
 from socket     import *
 from time       import *  
 from subprocess import *
-from basic_classes.box import *
-from basic_classes.number import *
-from basic_classes.symbol import *
-from basic_classes.connection import *
+from box_classes.box import *
+from box_classes.number import *
+from box_classes.symbol import *
+from box_classes.connection import *
 
 
 
@@ -36,9 +36,10 @@ class RemotePd ( Thread ):
    #run method 
     def run ( self ):
        if self.nogui:
-           temp = "cd %s && pd -nogui %s/server.pd" %(self.pd_dir, self.server_dir)
+           temp = "%s/pd -nogui %s/server.pd" %(self.pd_dir, self.server_dir)
        else:
-           temp = "cd %s && pd %s/server.pd" %(self.pd_dir, self.server_dir)
+           temp = "%s/pd %s/server.pd" %(self.pd_dir, self.server_dir)
+       print(temp)
        self.p = Popen(temp, shell=True)
 
 
@@ -92,7 +93,7 @@ class Communication():
         
     #connecting to pd
     def init_pd(self): 
-        print "initializing server.pd..."
+        print("initializing server.pd...")
         self.thread.start()
         sleep(5)
         
@@ -102,10 +103,10 @@ class Communication():
             self.rcv_socket.listen(1) 
             self.rcv, addr = self.rcv_socket.accept()
             self.init_pyata()
-            print "connecting with pd"
+            print("connecting with pd")
             return True
-        except error, err: 
-            print "Error connecting to %s:%d: %s" % (self.host, self.snd_port, err) 
+        except error as err: 
+            print("Error connecting to %s:%d: %s" % (self.host, self.snd_port, err))
             return False
     
     #init some socket variables
@@ -119,10 +120,10 @@ class Communication():
     #sending a command to pd
     def send_pd(self, commands):
         try:
-            self.snd_socket.send(commands)
+            self.snd_socket.send(commands.encode("ascii"))
             return True
-        except error, err: 
-            print "Error sending message %s : %s" % (message, err) 
+        except error as err: 
+            print("Error sending message %s : %s" % (commands, err))
             return False
 
 
@@ -135,15 +136,15 @@ class Communication():
             self.snd_socket.close() 
             self.rcv_socket.close()
             self.file.close()
-            print "closing connection with pd" 
+            print("closing connection with pd")
             return True
-        except error, err: 
-            print "Error sending message %s : %s" % (message, err) 
+        except error as err: 
+            print("Error sending message %s : %s" % (message, err))
             return False   
 
     
     def save_state(self, canvas):
-        self.snd_socket.send(canvas + "menusave ; ")
+        self.snd_socket.send((canvas + "menusave ; ").encode("ascii"))
         sleep(0.1)
     
     #returns the useful content of a file

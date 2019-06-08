@@ -10,7 +10,7 @@
 ##########################################################
 
 from threading  import *
-from basic_classes.box import *
+from box_classes.box import *
 
 class GuiUpdater(Thread):
     #class variable that indicates if the thread should end
@@ -24,7 +24,7 @@ class GuiUpdater(Thread):
     #run method
     def run(self):
         while not(GuiUpdater.finish):
-            temp = self.rcv.recv(1024)
+            temp = self.rcv.recv(1024).decode("utf-8")
             commands = temp.split(";")
             
             for c in commands:

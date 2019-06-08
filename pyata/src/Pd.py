@@ -11,13 +11,13 @@
 
 
 
-from basic_classes.box import *
-from basic_classes.object import *
-from basic_classes.message import *
-from basic_classes.number import *
-from basic_classes.symbol import *
-from basic_classes.comment import *
-from basic_classes.connection import *
+from box_classes.box import *
+from box_classes.object import *
+from box_classes.message import *
+from box_classes.number import *
+from box_classes.symbol import *
+from box_classes.comment import *
+from box_classes.connection import *
 from communication import *
 from gui_updater import *   
 from transfer_board import * 
