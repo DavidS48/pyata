@@ -2,121 +2,101 @@ from collections import defaultdict
 
 def goes_to(connection, target_in):
     while True:
-        if type(connection.parent) == AutoComb:
+        if connection.parent.auto:
             connection = connection.parent.o1.connections[0]
         elif connection == target_in:
             return True
         else:
             return False
 
-def disconnect(output, connection):
+def disconnect_compound(from_port, to_port):
     while True:
-        if type(connection.parent) == AutoComb:
+        from_port.disconnect(to_port)
+        if to_port.parent.auto:
             # We've found an intermediate operation!
-            if connection.name == "i1":
-                other_input = connection.parent.i2
+            if to_port.name == "i1":
+                other_input = to_port.parent.i2
             else:
-                other_input = connection.parent.i1
-            other_source = other_input.connections[0]
-            if type(other_source.parent) == AutoNum:
-                # Delete the operator and its other input and carry on down.
-                output = connection.parent.o1
-                connection = connection.parent.o1.connections[0]
+                other_input = to_port.parent.i1
+            other_from = other_input.connections[0]
+            if other_from.parent.auto: # need to check it's a number
+                # Have to hope it gets deleted when it has no connections.
+                other_from.disconnect(other_input)
+                from_port = to_port.parent.o1
+                to_port = to_port.parent.o1.connections[0]
             else:
                 # Delete the operator and patch its other input to its output.
-                output = connection.parent.o1
-                other_source._replace(other_input, connection.parent.o1.connections[0])
-                connection.parent.o1.connections[0]._replace(output, other_source)
+                new_to = to_port.parent.o1.connections[0]
+                other_input.disconnect(other_from)
+                to_port.parent.o1.disconnect(new_to)
+                other_from.connect(new_to)
                 break
         else:
-            connection._remove(output)
             break
 
-
-class Out:
+class Port:
     def __init__(self, parent, name):
         self.parent = parent
         self.name = name
         self.connections = []
 
-    def _remove(self, other):
-        self.connections = [c for c in self.connections if c != other]
+    def disconnect(self, other):
+        self.connections.remove(other)
+        other.connections.remove(self)
 
-    def _replace(self, old_other, new_other):
-        self.connections = [c if c != old_other else new_other for c in self.connections]
+    def connect(self, other):
+        self.connections.append(other)
+        other.connections.append(self)
 
-    def __ror__(self, other):
-        if type(other) == In:
-            new_self_connections = []
-            for c in self.connections:
-                if goes_to(c, other):
-                    disconnect(self, c)
-                else:
-                    new_self_connections.append(c)
-            self.connections = new_self_connections
-        else:
-            raise TypeError
+class Out(Port):
 
     def __add__(self, other):
         if type(other) == Out:
-            plusbox = AutoComb("+")
+            plusbox = self.parent.make_plusbox()
             plusbox.i1 << self
             plusbox.i2 << other
             return plusbox.o1
         elif type(other) in (float, int):
-            numbox = AutoNum(str(other))
-            plusbox = AutoComb("+")
+            numbox = self.parent.make_numbox(str(other))
+            plusbox = self.parent.make_plusbox()
             plusbox.i1 << self
             plusbox.i2 << numbox.o1
             return plusbox.o1
         else:
             raise TypeError
 
+    def __ror__(self, other):
+        if type(other) == In:
+            return self | other
+        else:
+            raise TypeError
 
     def __repr__(self):
         return f"{self.parent}.{self.name}"
 
-class In:
-    def __init__(self, parent, name):
-        self.parent = parent
-        self.name = name
-        self.connections = []
-
-    def _remove(self, other):
-        self.connections = [c for c in self.connections if c != other]
-
-    def _replace(self, old_other, new_other):
-        self.connections = [c if c != old_other else new_other for c in self.connections]
-
+class In(Port):
     def __repr__(self):
         return f"{self.parent}.{self.name}"
 
     def __lshift__(self, other):
         if type(other) == Out:
-            self.connections.append(other)
-            other.connections.append(self)
+            self.connect(other)
         else:
             raise TypeError
 
     def __ilshift__(self, other):
         if type(other) == Out:
             if self.connections:
-                self.connections[-1] = other
-            else:
-                self.connections = [other]
-            other.connections.append(self)
+                self | self.connections[-1]
+            self << other
         else:
-            raise TypeError
+            raise NotImplementedError
 
     def __ror__(self, other):
         if type(other) == Out:
-            new_other_connections = []
             for c in other.connections:
                 if goes_to(c, self):
-                    disconnect(other, c)
-                else:
-                    new_other_connections.append(c)
-            other.connections = new_other_connections
+                    disconnect_compound(other, c)
         else:
             raise TypeError
 
@@ -144,10 +124,18 @@ class OutArray(PortArray):
     PortClass = Out
 
 class Obj:
-    def __init__(self, name = "some object"):
+    def __init__(self, name = "some object", auto=False):
         self.name = name
+        self.auto = auto
         self.outs = OutArray(self)
         self.ins = InArray(self)
+
+    def make_plusbox(self):
+        return Obj(name="AutoPlus", auto=True)
+
+    def make_numbox(self, number):
+        return Obj(name = f"AutoNum {number}", auto=True)
+
 
     def __getattr__(self, name):
         if name.startswith("i"):
@@ -169,13 +157,5 @@ class Obj:
 
     def __repr__(self):
         return f"Object: {self.name}"
-
-class AutoComb(Obj):
-    def __repr__(self):
-        return f"AutoComb: {self.name}"
-
-class AutoNum(Obj):
-    def __repr__(self):
-        return f"AutoNum: {self.name}"
 
 
