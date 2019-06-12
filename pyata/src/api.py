@@ -11,25 +11,25 @@ def goes_to(connection, target_in):
 
 def disconnect_compound(from_port, to_port):
     while True:
-        from_port.disconnect(to_port)
+        to_port.disconnect(from_port)
         if to_port.parent.auto:
             # We've found an intermediate operation!
-            if to_port.name == "i1":
+            if to_port.name == 1:
                 other_input = to_port.parent.i2
             else:
                 other_input = to_port.parent.i1
             other_from = other_input.connections[0]
             if other_from.parent.auto: # need to check it's a number
                 # Have to hope it gets deleted when it has no connections.
-                other_from.disconnect(other_input)
+                other_input.disconnect(other_from)
                 from_port = to_port.parent.o1
                 to_port = to_port.parent.o1.connections[0]
             else:
                 # Delete the operator and patch its other input to its output.
                 new_to = to_port.parent.o1.connections[0]
                 other_input.disconnect(other_from)
-                to_port.parent.o1.disconnect(new_to)
-                other_from.connect(new_to)
+                new_to.disconnect(to_port.parent.o1)
+                new_to.connect(other_from)
                 break
         else:
             break
@@ -39,14 +39,6 @@ class Port:
         self.parent = parent
         self.name = name
         self.connections = []
-
-    def disconnect(self, other):
-        self.connections.remove(other)
-        other.connections.remove(self)
-
-    def connect(self, other):
-        self.connections.append(other)
-        other.connections.append(self)
 
 class Out(Port):
 
@@ -100,6 +92,16 @@ class In(Port):
         else:
             raise TypeError
 
+    def disconnect(self, other):
+        #self.parent.disconnect(other.parent, self.name, other.name)
+        self.connections.remove(other)
+        other.connections.remove(self)
+
+    def connect(self, other):
+        #self.parent.connect(other.parent, self.name, other.name)
+        self.connections.append(other)
+        other.connections.append(self)
+
 
 class PortArray:
     def __init__(self, parent):
@@ -111,11 +113,13 @@ class PortArray:
         return sum(len(port.connections) for port in self.ports.values())
 
     def get(self, name):
+        # check name is a valid port name
+        pos = int(name[1:])
         try:
-            return self.ports[name]
+            return self.ports[pos]
         except KeyError:
-            self.ports[name] = self.PortClass(self.parent, name)
-            return self.ports[name]
+            self.ports[pos] = self.PortClass(self.parent, pos)
+            return self.ports[pos]
 
 class InArray(PortArray):
     PortClass = In
@@ -129,6 +133,12 @@ class Obj:
         self.auto = auto
         self.outs = OutArray(self)
         self.ins = InArray(self)
+
+    def connect(self, target, port, target_port):
+        pass
+
+    def disconnect(self, target, port, target_port):
+        pass
 
     def make_plusbox(self):
         return Obj(name="AutoPlus", auto=True)
