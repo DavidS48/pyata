@@ -96,7 +96,15 @@ class TestConnectionArithmetic(unittest.TestCase):
         self.assertEqual(obj2.ins.total_connections, 0)
         self.assertEqual(obj2.outs.total_connections, 0)
 
-      
+    def test_disconnect_multi_add(self):
+        obj1 = Obj("obj1")
+        obj2 = Obj("obj2")
+        obj1.i1 << obj2.o1 + (obj2.o2 + obj2.o3)
+        obj1.i1 | obj2.o1
+        self.assertEqual(obj1.ins.total_connections, 1)
+        self.assertEqual(obj1.outs.total_connections, 0)
+        self.assertEqual(obj2.ins.total_connections, 0)
+        self.assertEqual(obj2.outs.total_connections, 2)
     
 if __name__ == "__main__":
     unittest.main()

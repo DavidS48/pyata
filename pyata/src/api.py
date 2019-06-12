@@ -2,7 +2,7 @@ from collections import defaultdict
 
 def goes_to(connection, target_in):
     while True:
-        if connection.parent.auto:
+        if connection.parent.auto_comb:
             connection = connection.parent.o1.connections[0]
         elif connection == target_in:
             return True
@@ -12,15 +12,15 @@ def goes_to(connection, target_in):
 def disconnect_compound(from_port, to_port):
     while True:
         to_port.disconnect(from_port)
-        if to_port.parent.auto:
+        if to_port.parent.auto_comb:
             # We've found an intermediate operation!
             if to_port.name == 1:
                 other_input = to_port.parent.i2
             else:
                 other_input = to_port.parent.i1
             other_from = other_input.connections[0]
-            if other_from.parent.auto: # need to check it's a number
-                # Have to hope it gets deleted when it has no connections.
+            if other_from.parent.auto_num:
+                # Disconnect everything and keep on deleting.
                 other_input.disconnect(other_from)
                 from_port = to_port.parent.o1
                 to_port = to_port.parent.o1.connections[0]
@@ -93,12 +93,12 @@ class In(Port):
             raise TypeError
 
     def disconnect(self, other):
-        #self.parent.disconnect(other.parent, self.name, other.name)
+        self.parent.disconnect(other.parent, self.name, other.name)
         self.connections.remove(other)
         other.connections.remove(self)
 
     def connect(self, other):
-        #self.parent.connect(other.parent, self.name, other.name)
+        self.parent.connect(other.parent, self.name, other.name)
         self.connections.append(other)
         other.connections.append(self)
 
@@ -128,9 +128,10 @@ class OutArray(PortArray):
     PortClass = Out
 
 class Obj:
-    def __init__(self, name = "some object", auto=False):
+    def __init__(self, name = "some object", auto_comb=False, auto_num=False):
         self.name = name
-        self.auto = auto
+        self.auto_comb = auto_comb
+        self.auto_num = auto_num
         self.outs = OutArray(self)
         self.ins = InArray(self)
 
@@ -141,10 +142,10 @@ class Obj:
         pass
 
     def make_plusbox(self):
-        return Obj(name="AutoPlus", auto=True)
+        return Obj(name="AutoPlus", auto_comb=True)
 
     def make_numbox(self, number):
-        return Obj(name = f"AutoNum {number}", auto=True)
+        return Obj(name = f"AutoNum {number}", auto_num=True)
 
 
     def __getattr__(self, name):
