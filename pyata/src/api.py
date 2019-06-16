@@ -127,7 +127,7 @@ class InArray(PortArray):
 class OutArray(PortArray):
     PortClass = Out
 
-class Obj:
+class Box:
     def __init__(self, name = "some object", auto_comb=False, auto_num=False):
         self.name = name
         self.auto_comb = auto_comb
@@ -142,10 +142,10 @@ class Obj:
         pass
 
     def make_plusbox(self):
-        return Obj(name="AutoPlus", auto_comb=True)
+        return Box(name="AutoPlus", auto_comb=True)
 
     def make_numbox(self, number):
-        return Obj(name = f"AutoNum {number}", auto_num=True)
+        return Box(name = f"AutoNum {number}", auto_num=True)
 
 
     def __getattr__(self, name):
@@ -167,6 +167,6 @@ class Obj:
                 print(value.connections, "->", key)
 
     def __repr__(self):
-        return f"Object: {self.name}"
+        return f"Box: {self.name}"
 
 
