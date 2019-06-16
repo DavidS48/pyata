@@ -3,7 +3,7 @@ from collections import defaultdict
 def goes_to(connection, target_in):
     while True:
         if connection.parent.auto_comb:
-            connection = connection.parent.o1.connections[0]
+            connection = connection.parent.o0.connections[0]
         elif connection == target_in:
             return True
         else:
@@ -14,21 +14,21 @@ def disconnect_compound(from_port, to_port):
         to_port.disconnect(from_port)
         if to_port.parent.auto_comb:
             # We've found an intermediate operation!
-            if to_port.name == 1:
-                other_input = to_port.parent.i2
-            else:
+            if to_port.name == 0:
                 other_input = to_port.parent.i1
+            else:
+                other_input = to_port.parent.i0
             other_from = other_input.connections[0]
             if other_from.parent.auto_num:
                 # Disconnect everything and keep on deleting.
                 other_input.disconnect(other_from)
-                from_port = to_port.parent.o1
-                to_port = to_port.parent.o1.connections[0]
+                from_port = to_port.parent.o0
+                to_port = to_port.parent.o0.connections[0]
             else:
                 # Delete the operator and patch its other input to its output.
-                new_to = to_port.parent.o1.connections[0]
+                new_to = to_port.parent.o0.connections[0]
                 other_input.disconnect(other_from)
-                new_to.disconnect(to_port.parent.o1)
+                new_to.disconnect(to_port.parent.o0)
                 new_to.connect(other_from)
                 break
         else:
@@ -45,17 +45,35 @@ class Out(Port):
     def __add__(self, other):
         if type(other) == Out:
             plusbox = self.parent.make_plusbox()
-            plusbox.i1 << self
-            plusbox.i2 << other
-            return plusbox.o1
+            plusbox.i0 << self
+            plusbox.i1 << other
+            return plusbox.o0
         elif type(other) in (float, int):
             numbox = self.parent.make_numbox(str(other))
             plusbox = self.parent.make_plusbox()
-            plusbox.i1 << self
-            plusbox.i2 << numbox.o1
-            return plusbox.o1
+            plusbox.i0 << self
+            plusbox.i1 << numbox.o0
+            numbox.set()
+            return plusbox.o0
         else:
             raise TypeError
+
+    def __mul__(self, other):
+        if type(other) == Out:
+            multbox = self.parent.make_multbox()
+            multbox.i0 << self
+            multbox.i1 << other
+            return multbox.o0
+        elif type(other) in (float, int):
+            numbox = self.parent.make_numbox(str(other))
+            multbox = self.parent.make_multbox()
+            multbox.i0 << self
+            multbox.i1 << numbox.o0
+            numbox.set(other)
+            return multbox.o0
+        else:
+            raise TypeError
+
 
     def __ror__(self, other):
         if type(other) == In:

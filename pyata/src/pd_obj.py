@@ -17,11 +17,20 @@ class LocationMap:
 locations = LocationMap()
 
 class PdBox(Box):
-    def connect(self, target, port, target_port):
-        connect(target.obj, target_port, self.obj, port)
+    def connect(self, source, port, source_port):
+        connect(source.obj, source_port, self.obj, port)
 
-    def disconnect(self, target, port, target_port):
-        disconnect(target.obj, target_port, self.obj, port)
+    def disconnect(self, source, port, source_port):
+        disconnect(source.obj, source_port, self.obj, port)
+
+    def make_plusbox(self):
+        return PdObj("+~")
+
+    def make_multbox(self):
+        return PdObj("*~")
+
+    def make_numbox(self, number):
+        return PdNum(number)
 
 class PdObj(PdBox):
     def __init__(self, text):
