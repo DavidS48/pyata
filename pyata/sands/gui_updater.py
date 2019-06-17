@@ -10,7 +10,7 @@
 ##########################################################
 
 from threading  import *
-from box_classes.box import *
+from .box_classes.box import *
 
 class GuiUpdater(Thread):
     #class variable that indicates if the thread should end

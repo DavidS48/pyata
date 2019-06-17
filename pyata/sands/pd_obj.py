@@ -1,5 +1,5 @@
-from api import Box
-from Pd import Object, Number, connect, disconnect
+from .api import Box
+from .Pd import Object, Number, connect, disconnect
 
 class LocationMap:
     def __init__(self):
@@ -22,6 +22,10 @@ class PdBox(Box):
 
     def disconnect(self, source, port, source_port):
         disconnect(source.obj, source_port, self.obj, port)
+
+    def move(self, x, y):
+        print("Moving ", self, x, y)
+        self.obj.move(x, y)
 
     def make_plusbox(self):
         return PdObj("+~")

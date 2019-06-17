@@ -165,6 +165,13 @@ class Box:
     def make_numbox(self, number):
         return Box(name = f"AutoNum {number}", auto_num=True)
 
+    def parents(self):
+        parents = []
+        for key, value in self.ins.ports.items():
+            for source in value.connections:
+                if source.parent not in parents:
+                    parents.append(source.parent)
+        return parents
 
     def __getattr__(self, name):
         if name.startswith("i"):
