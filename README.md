@@ -11,7 +11,22 @@ from https://code.google.com/archive/p/pyata
 
 Singing Sands is a Python library for controlling the [Pure Data](http://puredata.info/) modular synthesis environment. It aims to provide a streamlined interface that's usable for live-coding and performance.
 
-It's built on the pyata project by Jerônimo Barbosa.
+## Installation
+
+On Linux...
+
+* Clone or download the repository to a directory, `pyata`.
+
+```
+cd pyata
+python3.6 -m venv venv
+source venv/bin/activate
+cd pyata
+pip install -e .
+```
+
+* Edit `pyata/properties.config` to set the location of your pd binary.
+* `python ./scripts/make_a_noise.py`
 
 ## License
 
