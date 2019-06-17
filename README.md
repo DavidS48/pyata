@@ -13,7 +13,12 @@ Singing Sands is a Python library for controlling the [Pure Data](http://puredat
 
 ## Installation
 
-On Linux...
+### Prerequisites
+
+* Python 3.6 or greater.
+* PureData - I'm testing with 0.48.1 - other version may well work but I don't know.
+
+### Linux
 
 * Clone or download the repository to a directory, `pyata`.
 
