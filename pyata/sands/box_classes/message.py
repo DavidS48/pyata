@@ -8,7 +8,7 @@
 ##########################################################
 ##########################################################
 
-
+from . import canvas
 from .box import *
 
 #number class itself
@@ -19,7 +19,7 @@ class Message (Box):
         Box.__init__(self,x, y, id)
 
     def create(self):
-        command = Box.canvas + "msg " + str(self.x) + " " + str(self.y) + " " + self.text + "; "
+        command = canvas.current.name + " msg " + str(self.x) + " " + str(self.y) + " " + self.text + "; "
         Box.snd.send_pd(command)
         Box.create(self)
     
@@ -30,8 +30,8 @@ class Message (Box):
         
         command = ""
         for i in text: #sends all key pressed
-            command += Box.canvas + "key 1 " + str(ord(i)) + " 0 ; " 
-            command += Box.canvas + "key 0 " + str(ord(i)) + " 0 ; "
+            command += canvas.current.name + " key 1 " + str(ord(i)) + " 0 ; " 
+            command += canvas.current.name + " key 0 " + str(ord(i)) + " 0 ; "
         Box.snd.send_pd(command)
         self.unselect() #unselects this
         #ajeita o indice atual do objeto na memoria do pd
@@ -42,12 +42,12 @@ class Message (Box):
     
     def click(self):
         #sets no-edit mode
-        command  = Box.canvas + "editmode 1 ; "
-        command += Box.canvas + "editmode 0 ; "
+        command  = canvas.current.name + " editmode 1 ; "
+        command += canvas.current.name + " editmode 0 ; "
         Box.snd.send_pd(command)
         Box.click(self)
         #sets edit mode
-        command  = Box.canvas + "editmode 1 ; "
+        command  = canvas.current.name + " editmode 1 ; "
         Box.snd.send_pd(command)
         
     

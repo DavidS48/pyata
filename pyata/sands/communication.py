@@ -24,7 +24,6 @@ from .box_classes.connection import *
 
 
 
-
 # a thread class that we're gonna use for calling the server.pd patch
 class RemotePd ( Thread ):
     def __init__(self, nogui, pd_dir, server_dir):
@@ -52,7 +51,7 @@ class Communication():
     def __init__(self, nogui): 
         # variables from config file
         self.pd_dir = ""
-        self.server_dir = "./aux_patches"
+        self.server_dir = "sands/aux_patches"
         self.host = "localhost" 
         self.snd_port = "" 
         self.rcv_port = ""      
@@ -69,7 +68,7 @@ class Communication():
         
     #loads the properties.config    
     def load_config(self):
-        config = open("../properties.config","r")
+        config = open("properties.config","r")
         
         #reads the pd dir
         temp = config.readline()
@@ -121,6 +120,7 @@ class Communication():
     def send_pd(self, commands):
         try:
             self.snd_socket.send(commands.encode("ascii"))
+            print(commands)
             return True
         except error as err: 
             print("Error sending message %s : %s" % (commands, err))
@@ -144,7 +144,7 @@ class Communication():
 
     
     def save_state(self, canvas):
-        self.snd_socket.send((canvas + "menusave ; ").encode("ascii"))
+        self.snd_socket.send((canvas + " menusave ; ").encode("ascii"))
         sleep(0.1)
     
     #returns the useful content of a file

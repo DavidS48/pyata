@@ -9,11 +9,8 @@
 
 from .box import *
 from time       import *  
+from . import canvas
 
-
-memory_connections = []
-
-    
 
 #connects two generic boxes
 def connect (b1, outlet, b2, inlet):
@@ -27,7 +24,7 @@ def disconnect(b1, outlet, b2, inlet):
     i = search_connection(b1, outlet, b2, inlet)
     #se realmente existir
     if i>-1:
-        return memory_connections[i].delete()
+        return canvas.current.connections[i].delete()
     else:
         return False
 
@@ -36,20 +33,19 @@ def disconnect(b1, outlet, b2, inlet):
 def search_connection (b1, outlet, b2, inlet):
     i=0   
     #seraching for a specific box in memory    
-    for c in memory_connections:
+    for c in canvas.current.connections:
         if (b1==c.box_orig) & (outlet==c.outlet) & (b2==c.box_dest) & (inlet==c.inlet):
             return i
         i+=1
     
     #return -1 if not
-    if i==len(memory_connections):
+    if i==len(canvas.current.connections):
         return -1
 
 
     
 
 class Connection:
-    canvas = "pd-new "
     snd = ""
 
     #constructor
@@ -63,25 +59,25 @@ class Connection:
         
     #creates a connection in Pd    
     def create(self):
-        b1 = search_box(self.box_orig)
-        b2 = search_box(self.box_dest)
+        b1 = canvas.current.box_number(self.box_orig)
+        b2 = canvas.current.box_number(self.box_dest)
 
         if (b1 > -1) & (b2 > -1):
             #get the state before inserting the connection
-            Connection.snd.save_state(Connection.canvas)
+            Connection.snd.save_state(canvas.current.name)
             t1 = self.snd.get_file()
 
             #try to build the connection
-            command = Connection.canvas + "connect " + str(b1) + " " + str(self.outlet) + " " + str(b2) + " " + str(self.inlet) + " ; "
+            command = " ".join([canvas.current.name, "connect", str(b1), str(self.outlet), str(b2), str(self.inlet)]) + " ; "
             Connection.snd.send_pd(command)
             
             #get the state after insertin the connection
-            Connection.snd.save_state(Connection.canvas)
+            Connection.snd.save_state(canvas.current.name)
             t2 = self.snd.get_file()
             
             #verifies if changed
             if t1 != t2:
-                memory_connections.append(self)
+                canvas.current.connections.append(self)
                 return True
             else:
                 return False
@@ -89,36 +85,30 @@ class Connection:
     
     #creates a connection in Pd    
     def delete(self):
-        b1 = search_box(self.box_orig)
-        b2 = search_box(self.box_dest)
+        b1 = canvas.current.box_number(self.box_orig)
+        b2 = canvas.current.box_number(self.box_dest)
         if (b1 > -1) & (b2 > -1):
             #get the state before removing the connection
-            Connection.snd.save_state(Connection.canvas)
+            Connection.snd.save_state(canvas.current.name)
             t1 = self.snd.get_file()
             
             #try to remove the connection
-            command = Connection.canvas + "disconnect " + str(b1) + " " + str(self.outlet) + " " + str(b2) + " " + str(self.inlet) + " ; "
+            command = " ".join([canvas.current.name, "disconnect ", str(b1), str(self.outlet), str(b2), str(self.inlet)]) + " ; "
             Connection.snd.send_pd(command)
             
             #get the state after removing the connection
-            Connection.snd.save_state(Connection.canvas)
+            Connection.snd.save_state(canvas.current.name)
             t2 = self.snd.get_file()
             
             #verifies if changed
             if t1 != t2:
                 i=search_connection(self.box_orig, self.outlet, self.box_dest, self.inlet)
-                memory_connections.pop(i)
+                canvas.current.connections.pop(i)
                 return True
             else:
                 return False
             
-            
-        
-    #method that sets the canvas
-    @staticmethod
-    def set_canvas(nc):
-        Connection.canvas = nc
-        
+       
     #method that sets the sender
     @staticmethod
     def set_sender(s):

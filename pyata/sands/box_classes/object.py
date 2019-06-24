@@ -9,7 +9,7 @@
 ##########################################################
 
 from .box import *
-
+from . import canvas
 
 
 
@@ -22,7 +22,7 @@ class Object (Box):
 
 
     def create(self):
-        command = Box.canvas + "obj " + str(self.x) + " " + str(self.y) + " " + self.label + "; "
+        command = canvas.current.name + " obj " + str(self.x) + " " + str(self.y) + " " + self.label + "; "
         Box.snd.send_pd(command)
         Box.create(self)
 
@@ -34,8 +34,8 @@ class Object (Box):
         
         command = ""
         for i in label: #sends all key pressed
-            command += Box.canvas + "key 1 " + str(ord(i)) + " 0 ; "
-            command += Box.canvas + "key 0 " + str(ord(i)) + " 0 ; " 
+            command += canvas.current.name + " key 1 " + str(ord(i)) + " 0 ; "
+            command += canvas.current.name + " key 0 " + str(ord(i)) + " 0 ; " 
         
         Box.snd.send_pd(command)
         self.unselect() #unselects this

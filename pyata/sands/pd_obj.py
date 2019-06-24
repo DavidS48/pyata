@@ -1,20 +1,8 @@
 from .api import Box
-from .Pd import Object, Number, connect, disconnect
-
-class LocationMap:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-
-    def get_new_location(self):
-        if self.y < 20:
-            self.y += 1
-        else:
-            self.y = 1
-            self.y += 1
-        return self.x * 100, self.y * 100
-
-locations = LocationMap()
+from .Pd import Object, Number, Message, connect, disconnect
+import sands.box_classes.box as box
+import sands.box_classes.connection as connection
+import sands.box_classes.canvas as canvas
 
 class PdBox(Box):
     def connect(self, source, port, source_port):
@@ -39,13 +27,32 @@ class PdBox(Box):
 class PdObj(PdBox):
     def __init__(self, text):
         super(PdObj, self).__init__(text)
-        x, y = locations.get_new_location()
+        x, y = canvas.current.get_new_location()
         self.obj = Object(x, y, text)
+
+class SubPatch(PdBox):
+    def __init__(self, name, func):
+        super(SubPatch, self).__init__(name)
+        x, y = canvas.current.get_new_location()
+        self.obj = Object(x, y, "pd " + name)
+        canvas.set_current("pd-" + name)
+        print(f"moved to {canvas.current.name}")
+        func()
+        canvas.set_current()
+
+class PdMess(PdBox):
+    def __init__(self, message):
+        super(PdMess, self).__init__(f"Message: {message}")
+        x, y = canvas.current.get_new_location()
+        self.obj = Message(x, y, message)
+
+    def click(self):
+        self.obj.click()
 
 class PdNum(PdBox):
     def __init__(self, number):
         super(PdNum, self).__init__(f"Number: {number}")
-        x, y = locations.get_new_location()
+        x, y = canvas.current.get_new_location()
         self.obj = Number(x, y)
         self.obj.set(number)
 

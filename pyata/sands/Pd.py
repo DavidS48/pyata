@@ -21,7 +21,7 @@ from .box_classes.connection import *
 from .communication import *
 from .gui_updater import *   
 from .transfer_board import * 
-
+import sands.box_classes.canvas as canvas
 
 
 class Pd():
@@ -52,21 +52,19 @@ class Pd():
         
     #salvando o arquivo
     def save(self):
-        self.c.save_state(Box.canvas)
+        self.c.save_state(canvas.current.name)
         
     #cleans the patch
     def clear(self):
-        self.c.send_pd(Box.canvas + "clear ; ")
-        del memory_box[:]  
-        del memory_connections[:]  
-        
+        self.c.send_pd(canvas.current.name + " clear ; ")
+        canvas.current.clear()
         
     
     #modifies the editmode. receives a boolean.
     def editmode(self, on_off):
-        command = Box.canvas + "editmode 1 ; "
+        command = canvas.current.name + " editmode 1 ; "
         if on_off==False:
-            command += Box.canvas + "editmode 0 ; "
+            command += canvas.current.name + " editmode 0 ; "
         self.c.send_pd(command)
     
     #modifies the dsp. receives a boolean
@@ -78,11 +76,11 @@ class Pd():
    
    #returns the memory available in Pd     
     def get_box_list(self):
-        return memory_box
+        return canvas.current.boxes
     
     #return the connections available in Pd
     def get_connection_list(self):
-        return memory_connections
+        return canvas.current.connections
     
     
     
@@ -108,7 +106,7 @@ class Pd():
               
     #select all method
     def selectall(self):
-        command = Box.canvas + "selectall ; "
+        command = canvas.current.name + " selectall ; "
         self.c.send_pd(command)
         self.tb.selectall()
     
