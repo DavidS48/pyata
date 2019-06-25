@@ -9,8 +9,8 @@
 ##########################################################
 ##########################################################
 
-from threading  import *
-from .box_classes.box import *
+from threading  import Thread
+from .box_classes import canvas
 
 class GuiUpdater(Thread):
     #class variable that indicates if the thread should end
@@ -22,6 +22,7 @@ class GuiUpdater(Thread):
         self.rcv = rcv
         
     #run method
+    # This probably won't work without sorting out how multiple canvases work
     def run(self):
         while not(GuiUpdater.finish):
             temp = self.rcv.recv(1024).decode("utf-8")
@@ -35,5 +36,5 @@ class GuiUpdater(Thread):
                 if len(result) > 1:                
                     value = c[0:i]
                     id= int(c[i:len(c)])
-                    box=memory_box[id-1] #get the box
+                    box=canvas.current.boxes[id-1] #get the box
                     box.value=value #updates its value   

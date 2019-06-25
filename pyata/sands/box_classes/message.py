@@ -9,7 +9,9 @@
 ##########################################################
 
 from . import canvas
-from .box import *
+from .. import communication
+
+from .box import Box
 
 #number class itself
 class Message (Box):
@@ -20,7 +22,7 @@ class Message (Box):
 
     def create(self):
         command = canvas.current.name + " msg " + str(self.x) + " " + str(self.y) + " " + self.text + "; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         Box.create(self)
     
     #edits this object
@@ -32,7 +34,7 @@ class Message (Box):
         for i in text: #sends all key pressed
             command += canvas.current.name + " key 1 " + str(ord(i)) + " 0 ; " 
             command += canvas.current.name + " key 0 " + str(ord(i)) + " 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         self.unselect() #unselects this
         #ajeita o indice atual do objeto na memoria do pd
         temp = memory_box.pop(search_box(self))
@@ -44,11 +46,11 @@ class Message (Box):
         #sets no-edit mode
         command  = canvas.current.name + " editmode 1 ; "
         command += canvas.current.name + " editmode 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         Box.click(self)
         #sets edit mode
         command  = canvas.current.name + " editmode 1 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
     
     #aux static function to debug this class

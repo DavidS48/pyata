@@ -8,16 +8,14 @@
 ##########################################################
 ##########################################################
 
-from .box    import *
-from socket import *
-from time import *
+from .box import Box
+from socket import socket
+from time import sleep
 from . import canvas
-
+from .. import communication
 
 #number class itself
-class Number (Box):
-    #class variables
-    rcv = ""
+class Number(Box):
     
     #constructor
     def __init__(self, x, y, id =-1):
@@ -26,16 +24,12 @@ class Number (Box):
 
     def create(self):
         command = canvas.current.name + " obj " + str(self.x) + " " + str(self.y) + " nmb ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         Box.create(self)
         command = "id " + str(canvas.current.box_id(self)) + " ; "
         #print command
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         sleep(0.1)
-    
-    @staticmethod
-    def init_socket(r):
-        Number.rcv = r
         
     #get the value from pd
     def get_value(self):
@@ -48,7 +42,7 @@ class Number (Box):
         #sets no-edit mode
         command  = canvas.current.name + " editmode 1 ; "
         command += canvas.current.name + " editmode 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         self.click() #clicks
         
@@ -56,7 +50,7 @@ class Number (Box):
         for i in str_value: #sends all key pressed
             command += canvas.current.name + " key 1 " + str(ord(i)) + " 0 ; "
             command += canvas.current.name + " key 0 " + str(ord(i)) + " 0 ; "   
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         command  = canvas.current.name + " key 1 10 0 ; " # press enter
         command += canvas.current.name + " key 0 10 0 ; "
@@ -64,14 +58,14 @@ class Number (Box):
         #sets edit mode
         command += canvas.current.name + " editmode 1 ; "
         
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
     
     #increments the lowest amount from the value of a number
     def increment(self):
         #sets no-edit mode
         command  = canvas.current.name + " editmode 1 ; "
         command += canvas.current.name + " editmode 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         command  = canvas.current.name + " mouse " + str(self.x+1) + " " + str(self.y+1) + " 1 0 ; "
         command += canvas.current.name + " motion " + str(self.x+1) + " " + str(self.y) + " 0 ; "
@@ -79,21 +73,21 @@ class Number (Box):
         #self.value = self.get_value()
         
         command += canvas.current.name + " editmode 1 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
     
     #decrements the lowest amount from the value of a numbe
     def decrement(self):
         #sets no-edit mode
         command  = canvas.current.name + " editmode 1 ; "
         command += canvas.current.name + " editmode 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         command  = canvas.current.name + " mouse " + str(self.x+1) + " " + str(self.y+1) + " 1 0 ; "
         command += canvas.current.name + " motion " + str(self.x+1) + " " + str(self.y+2) + " 0 ; "
         command += canvas.current.name + " mouseup " + str(self.x+1) + " " + str(self.y+2) + " 1 0 ; "
         #self.value = self.get_value()
         command += canvas.current.name + " editmode 1 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
     
 
     

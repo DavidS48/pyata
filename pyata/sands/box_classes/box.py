@@ -8,14 +8,12 @@
 ##########################################################
 ##########################################################
 
-from time import *
+from time import sleep
 from . import canvas
-
+from .. import communication
 
 #box class itself
 class Box:
-    # class variables (not instance variables
-    snd = "" #used to communicate to pd
    
     #constructor of the class
     def __init__(self, x, y, id):
@@ -37,7 +35,7 @@ class Box:
     def delete(self):
         self.select()
         command = canvas.current.name + " cut ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         i=canvas.current.box_number(self)
         
@@ -50,7 +48,7 @@ class Box:
             for id in range(i, len(canvas.current.boxes)):
                 command = "decrement " + str(id+2) + " ; "
                 #print command
-                Box.snd.send_pd(command); 
+                communication.snd.send_pd(command); 
                 sleep(0.01)
  
             return True
@@ -58,19 +56,12 @@ class Box:
         else:
             print(False)
         
-
-       
-    #method that sets the sender
-    @staticmethod
-    def set_sender(s):
-        Box.snd = s
-    
     #clicks inside this obj
     def click(self):
         #command  = []
         command  = " ".join([canvas.current.name, "mouse", str(self.x+1), str(self.y+1)]) + " 1 0 ; "
         command += " ".join([canvas.current.name, "mouseup", str(self.x+1), str(self.y+1)]) + " 1 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
     # method that moves this box   
     def move(self, new_x, new_y):
@@ -80,7 +71,7 @@ class Box:
         self.x=new_x
         self.y=new_y
         for command in commands:
-            Box.snd.send_pd(command)
+            communication.snd.send_pd(command)
             sleep(0.01)
         self.unselect()
     
@@ -89,7 +80,7 @@ class Box:
         command  = canvas.current.name + " mouse " + str(self.x-2) + " " + str(self.y-2) + " 1 0 ; "
         command += canvas.current.name + " motion " + str(self.x+1) + " " + str(self.y+1) + " 0 ; "
         command += canvas.current.name + " mouseup " + str(self.x+1) + " " + str(self.y+1) + " 1 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         for b in canvas.current.boxes:
             b.selected = False
@@ -99,7 +90,7 @@ class Box:
     def unselect(self):
         command  = canvas.current.name + " mouse " + str(self.x-2) + " " + str(self.y-2) + " 1 0 ; "
         command += canvas.current.name + " mouseup " + str(self.x-2) + " " + str(self.y-2) + " 1 0 ; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         
         for b in canvas.current.boxes:
             b.selected = False

@@ -7,10 +7,8 @@
 ##########################################################
 ##########################################################
 
-from .box import *
-from time       import *  
 from . import canvas
-
+from .. import communication
 
 #connects two generic boxes
 def connect (b1, outlet, b2, inlet):
@@ -46,8 +44,6 @@ def search_connection (b1, outlet, b2, inlet):
     
 
 class Connection:
-    snd = ""
-
     #constructor
     def __init__(self, box_orig, outlet, box_dest, inlet):
         self.box_orig = box_orig
@@ -64,16 +60,16 @@ class Connection:
 
         if (b1 > -1) & (b2 > -1):
             #get the state before inserting the connection
-            Connection.snd.save_state(canvas.current.name)
-            t1 = self.snd.get_file()
+            communication.snd.save_state(canvas.current.name)
+            t1 = communication.snd.get_file()
 
             #try to build the connection
             command = " ".join([canvas.current.name, "connect", str(b1), str(self.outlet), str(b2), str(self.inlet)]) + " ; "
-            Connection.snd.send_pd(command)
+            communication.snd.send_pd(command)
             
             #get the state after insertin the connection
-            Connection.snd.save_state(canvas.current.name)
-            t2 = self.snd.get_file()
+            communication.snd.save_state(canvas.current.name)
+            t2 = communication.snd.get_file()
             
             #verifies if changed
             if t1 != t2:
@@ -89,16 +85,16 @@ class Connection:
         b2 = canvas.current.box_number(self.box_dest)
         if (b1 > -1) & (b2 > -1):
             #get the state before removing the connection
-            Connection.snd.save_state(canvas.current.name)
-            t1 = self.snd.get_file()
+            communication.snd.save_state(canvas.current.name)
+            t1 = communication.snd.get_file()
             
             #try to remove the connection
             command = " ".join([canvas.current.name, "disconnect ", str(b1), str(self.outlet), str(b2), str(self.inlet)]) + " ; "
-            Connection.snd.send_pd(command)
+            communication.snd.send_pd(command)
             
             #get the state after removing the connection
-            Connection.snd.save_state(canvas.current.name)
-            t2 = self.snd.get_file()
+            communication.snd.save_state(canvas.current.name)
+            t2 = communication.snd.get_file()
             
             #verifies if changed
             if t1 != t2:
@@ -108,10 +104,5 @@ class Connection:
             else:
                 return False
             
-       
-    #method that sets the sender
-    @staticmethod
-    def set_sender(s):
-        Connection.snd = s
         
         

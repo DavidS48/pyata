@@ -11,14 +11,10 @@
 ##########################################################
 
 #import sys
-from threading  import *
-from socket     import *
-from time       import *  
-from subprocess import *
-from .box_classes.box import *
-from .box_classes.number import *
-from .box_classes.symbol import *
-from .box_classes.connection import *
+from threading  import Thread
+from socket     import socket, AF_INET, SOCK_STREAM
+from time       import sleep
+from subprocess import Popen
 
 
 
@@ -110,10 +106,8 @@ class Communication():
     
     #init some socket variables
     def init_pyata(self):
-        Box.set_sender(self)
-        Connection.set_sender(self)
-        Number.init_socket(self.rcv)
-        Symbol.init_socket(self.rcv)
+        global snd
+        snd = self
     
     
     #sending a command to pd
@@ -170,6 +164,17 @@ class Communication():
         sleep(5)
         c.finish_pd()
         
-        
+class DummyCommunication:        
+    #sending a command to pd
+    def send_pd(self, commands):
+        print(commands)
+        return True
 
-        
+    def save_state(self, canvas):
+        pass
+    
+    #returns the useful content of a file
+    def get_file(self):
+        return ""
+
+snd = DummyCommunication()

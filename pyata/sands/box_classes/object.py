@@ -8,7 +8,8 @@
 ##########################################################
 ##########################################################
 
-from .box import *
+from .box import Box
+from .. import communication
 from . import canvas
 
 
@@ -23,7 +24,7 @@ class Object (Box):
 
     def create(self):
         command = canvas.current.name + " obj " + str(self.x) + " " + str(self.y) + " " + self.label + "; "
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         Box.create(self)
 
     
@@ -37,7 +38,7 @@ class Object (Box):
             command += canvas.current.name + " key 1 " + str(ord(i)) + " 0 ; "
             command += canvas.current.name + " key 0 " + str(ord(i)) + " 0 ; " 
         
-        Box.snd.send_pd(command)
+        communication.snd.send_pd(command)
         self.unselect() #unselects this
         #ajeita o indice atual do objeto na memoria do pd
         temp = memory_box.pop(search_box(self))

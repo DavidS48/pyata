@@ -1,8 +1,10 @@
 from .api import Box
-from .Pd import Object, Number, Message, connect, disconnect
 import sands.box_classes.box as box
-import sands.box_classes.connection as connection
 import sands.box_classes.canvas as canvas
+from sands.box_classes.object import Object
+from sands.box_classes.number import Number
+from sands.box_classes.message import Message
+from sands.box_classes.connection import connect, disconnect
 
 class PdBox(Box):
     def connect(self, source, port, source_port):

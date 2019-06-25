@@ -10,17 +10,8 @@
 ##########################################################
 
 
-
-from .box_classes.box import *
-from .box_classes.object import *
-from .box_classes.message import *
-from .box_classes.number import *
-from .box_classes.symbol import *
-from .box_classes.comment import *
-from .box_classes.connection import *
-from .communication import *
-from .gui_updater import *   
-from .transfer_board import * 
+from .communication import Communication
+from .gui_updater import GuiUpdater
 import sands.box_classes.canvas as canvas
 
 
@@ -29,7 +20,6 @@ class Pd():
     def __init__(self):
         self.c = Communication(False)
         self.b = ""
-        self.tb = TransferBoard()
     
     #inicializando a api
     def init(self):
@@ -82,35 +72,7 @@ class Pd():
     def get_connection_list(self):
         return canvas.current.connections
     
-    
-    
-    #################################
-    ## EDIT MENU METHODS
-    #################################
-
-    #copy method
-    def copy(self):
-        self.tb.copy()
-    
-    #paste method
-    def paste(self, x, y):
-        self.tb.paste(x, y)
-        
-    #cut method
-    def cut(self):
-        self.tb.cut()
-        
-    #duplicate method
-    def duplicate(self, x, y):
-        self.tb.duplicate(x, y)
-              
-    #select all method
-    def selectall(self):
-        command = canvas.current.name + " selectall ; "
-        self.c.send_pd(command)
-        self.tb.selectall()
-    
-    
+   
     
     #################################
     ## FIND MENU METHODS

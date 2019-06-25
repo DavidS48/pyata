@@ -9,7 +9,7 @@
 ##########################################################
 
 
-from .box import *
+from .box import Box
 
 #number class itself
 class Comment (Box):
