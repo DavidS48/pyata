@@ -26,6 +26,18 @@ class PdBox(Box):
     def make_numbox(self, number):
         return PdNum(number)
 
+class PdInlet(PdBox):
+    def __init__(self):
+        super(PdInlet, self).__init__("inlet~")
+        x, y = canvas.current.get_new_location(box_type = "inlet")
+        self.obj = Object(x, y, "inlet~")
+
+class PdOutlet(PdBox):
+    def __init__(self):
+        super(PdOutlet, self).__init__("outlet~")
+        x, y = canvas.current.get_new_location(box_type = "outlet")
+        self.obj = Object(x, y, "outlet~")
+
 class PdObj(PdBox):
     def __init__(self, text):
         super(PdObj, self).__init__(text)

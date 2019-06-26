@@ -1,4 +1,4 @@
-from sands.pd_obj import PdObj, PdMess, SubPatch
+from sands.pd_obj import PdObj, PdMess, PdInlet, PdOutlet, SubPatch
 from sands.Pd import Pd 
 from time import sleep
 
@@ -8,10 +8,10 @@ pd.init()
 
 
 def amp_mod():
-    sig_in = PdObj("inlet~")
-    rate_in = PdObj("inlet")
+    sig_in = PdInlet()
+    rate_in = PdInlet()
     osc = PdObj("osc~")
-    out = PdObj("outlet~")
+    out = PdOutlet()
     osc.i0 << rate_in.o0
     out.i0 << osc.o0 * sig_in.o0
     print("Created.")
