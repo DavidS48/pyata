@@ -17,14 +17,23 @@ class PdBox(Box):
         print("Moving ", self, x, y)
         self.obj.move(x, y)
 
-    def make_plusbox(self):
-        return PdObj("+~")
+    def make_plusbox(self, value = None):
+        if value is not None:
+            return PdObj(f"+~ {value}")
+        else:
+            return PdObj("+~")
 
-    def make_multbox(self):
-        return PdObj("*~")
+    def make_multbox(self, value = None):
+        if value is not None:
+            return PdObj(f"*~ {value}")
+        else:
+            return PdObj("*~")
 
-    def make_numbox(self, number):
-        return PdNum(number)
+class PdMInlet(PdBox):
+    def __init__(self):
+        super(PdMInlet, self).__init__("inlet")
+        x, y = canvas.current.get_new_location(box_type = "inlet")
+        self.obj = Object(x, y, "inlet")
 
 class PdInlet(PdBox):
     def __init__(self):

@@ -18,19 +18,23 @@ def disconnect_compound(from_port, to_port):
                 other_input = to_port.parent.i1
             else:
                 other_input = to_port.parent.i0
-            other_from = other_input.connections[0]
-            if other_from.parent.auto_num:
-                # Disconnect everything and keep on deleting.
-                other_input.disconnect(other_from)
+            if other_input.connections:
+                other_from = other_input.connections[0]
+                if other_from.parent.auto_num:
+                    # Disconnect everything and keep on deleting.
+                    other_input.disconnect(other_from)
+                    from_port = to_port.parent.o0
+                    to_port = to_port.parent.o0.connections[0]
+                else:
+                    # Delete the operator and patch its other input to its output.
+                    new_to = to_port.parent.o0.connections[0]
+                    other_input.disconnect(other_from)
+                    new_to.disconnect(to_port.parent.o0)
+                    new_to.connect(other_from)
+                    break
+            else:
                 from_port = to_port.parent.o0
                 to_port = to_port.parent.o0.connections[0]
-            else:
-                # Delete the operator and patch its other input to its output.
-                new_to = to_port.parent.o0.connections[0]
-                other_input.disconnect(other_from)
-                new_to.disconnect(to_port.parent.o0)
-                new_to.connect(other_from)
-                break
         else:
             break
 
@@ -49,11 +53,8 @@ class Out(Port):
             plusbox.i1 << other
             return plusbox.o0
         elif type(other) in (float, int):
-            numbox = self.parent.make_numbox(str(other))
-            plusbox = self.parent.make_plusbox()
+            plusbox = self.parent.make_plusbox(value = other)
             plusbox.i0 << self
-            plusbox.i1 << numbox.o0
-            numbox.set()
             return plusbox.o0
         else:
             raise TypeError
@@ -65,11 +66,8 @@ class Out(Port):
             multbox.i1 << other
             return multbox.o0
         elif type(other) in (float, int):
-            numbox = self.parent.make_numbox(str(other))
-            multbox = self.parent.make_multbox()
+            multbox = self.parent.make_multbox(value = other)
             multbox.i0 << self
-            multbox.i1 << numbox.o0
-            numbox.set(other)
             return multbox.o0
         else:
             raise TypeError
@@ -159,11 +157,8 @@ class Box:
     def disconnect(self, target, port, target_port):
         pass
 
-    def make_plusbox(self):
-        return Box(name="AutoPlus", auto_comb=True)
-
-    def make_numbox(self, number):
-        return Box(name = f"AutoNum {number}", auto_num=True)
+    def make_plusbox(self, value = None):
+        return Box(name=f"AutoPlus {value}", auto_comb=True)
 
     def parents(self):
         parents = []
