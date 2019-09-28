@@ -2,6 +2,22 @@
 import time
 
 
+class Stopped(Exception):
+    pass
+
+class ValueChannel:
+    def __init__(self, values, targets = None):
+        self.values = values
+        self.targets = targets or []
+
+    def play(self, position):
+        try:
+            value = self.values[position]
+            for target in self.targets:
+                target.set(value)
+        except KeyError:
+            pass
+
 class ValueSequencer:
     def __init__(
             self,
@@ -11,30 +27,38 @@ class ValueSequencer:
             value_targets = None,
             bang_targets = None):
         self.bpm = bpm
-        self.pattern = pattern
         self.div = div
-        self.value_targets = value_targets or []
+        self.length = len(pattern)
+        self.channels = [ValueChannel(pattern, value_targets)]
         self.bang_targets = bang_targets or []
         self.infinite = True
+        self.current_pos = 0
 
     def run(self):
         start_time = time.time()
-        value_iter = iter(self.pattern)
         while True:
-            div_time = 60 / (self.div * self.bpm)
             try:
-                value = next(value_iter)
-            except StopIteration:
-                if self.infinite:
-                    value_iter = iter(self.pattern)
-                    value = next(value_iter)
-                else:
-                    break
-            for target in self.value_targets:
-                target.set(value)
-            for target in self.bang_targets:
-                target.click()
-            time.sleep(div_time + start_time - time.time())
-            start_time += div_time
+                div_time = 60 / (self.div * self.bpm)
+                self._tick()
+                time.sleep(div_time + start_time - time.time())
+                start_time += div_time
+            except Stopped:
+                break
+
+    def add_channel(self, pattern, targets):
+        self.channels.append(ValueChannel(pattern, targets))
+
+
+    def _tick(self):
+        for channel in self.channels:
+            channel.play(self.current_pos)
+        for target in self.bang_targets:
+            target.click()
+        self.current_pos += 1
+        if self.current_pos >= self.length:
+            if self.infinite:
+                self.current_pos = 0
+            else:
+                raise Stopped()
 
 

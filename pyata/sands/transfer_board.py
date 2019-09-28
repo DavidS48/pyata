@@ -10,7 +10,7 @@
 ##########################################################
 
 
-from .box_classes.box import *
+from .box_classes.box import Box
 import copy
 
 class TransferBoard():

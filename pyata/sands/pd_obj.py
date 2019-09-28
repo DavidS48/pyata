@@ -58,10 +58,23 @@ class SubPatch(PdBox):
         super(SubPatch, self).__init__(name)
         x, y = canvas.current.get_new_location()
         self.obj = Object(x, y, "pd " + name)
+        self.name = name
         canvas.set_current("pd-" + name)
         print(f"moved to {canvas.current.name}")
-        func()
+        self.controls = func()
         canvas.set_current()
+
+    def tweak(self, key, value):
+        try:
+            control = self.controls[key]
+            if type(control) is tuple:
+                control[0].tweak(control[1], value)
+            else:
+                canvas.set_current("pd-" + self.name)
+                control.set(value)
+                canvas.set_current()
+        except KeyError:
+            pass
 
 class PdMess(PdBox):
     def __init__(self, message):
